@@ -5,12 +5,14 @@ import com.example.dayonetest.controller.response.ExamFailStudentResponse;
 import com.example.dayonetest.controller.response.ExamPassStudentResponse;
 import com.example.dayonetest.model.StudentFail;
 import com.example.dayonetest.model.StudentPass;
+import com.example.dayonetest.model.StudentScore;
 import com.example.dayonetest.repository.StudentFailRepository;
 import com.example.dayonetest.repository.StudentPassRepository;
 import com.example.dayonetest.repository.StudentScoreRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.List;
@@ -29,6 +31,8 @@ class StudentScoreServiceTest {
                                         Mockito.mock ( StudentFailRepository.class )
                                                     );
         String exam = "testExam";
+
+
         //when
         studentScoreService.saveScore (  new SaveExamScoreRequest ( "yunseok", 80, 100, 60 ), exam );
         //then
@@ -44,12 +48,43 @@ class StudentScoreServiceTest {
         StudentScoreService studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
         String exam = "testExam";
         SaveExamScoreRequest testPassStudent = new SaveExamScoreRequest ( "pass", 60, 60, 60 );
+
+        StudentScore expectedScore = StudentScore.builder ( )
+                                            .studentName ( "pass" )
+                                            .exam ( exam )
+                                            .korScore ( 60 )
+                                            .englishScore ( 60 )
+                                            .mathScore ( 60 )
+                                            .build ( );
+
+        StudentPass expectedPass = StudentPass.builder ( )
+                                                .studentName ( "pass" )
+                                                .exam ( exam )
+                                                .avgScore ( 60.0 )
+                                                .build ( );
+
+        ArgumentCaptor <StudentScore> studentScoreArgumentCaptor = ArgumentCaptor.forClass ( StudentScore.class );
+        ArgumentCaptor <StudentPass> studentPassArgumentCaptor = ArgumentCaptor.forClass ( StudentPass.class );
+        ArgumentCaptor <StudentFail> studentFailArgumentCaptor = ArgumentCaptor.forClass ( StudentFail.class );
+
         //when
         studentScoreService.saveScore ( testPassStudent, exam );
         //then
-        Mockito.verify ( studentScoreRepository, Mockito.times ( 1 ) ).save ( Mockito.any () );
-        Mockito.verify ( studentPassRepository, Mockito.times ( 1 ) ).save ( Mockito.any () );
-        Mockito.verify ( studentFailRepository, Mockito.times ( 0 ) ).save ( Mockito.any () );
+        Mockito.verify ( studentScoreRepository, Mockito.times ( 1 ) ).save ( studentScoreArgumentCaptor.capture () );
+        StudentScore captorValue = studentScoreArgumentCaptor.getValue ( );
+        Assertions.assertEquals ( expectedScore.studentName, captorValue.studentName );
+        Assertions.assertEquals ( expectedScore.exam, captorValue.exam );
+        Assertions.assertEquals ( expectedScore.korScore, captorValue.korScore );
+        Assertions.assertEquals ( expectedScore.englishScore, captorValue.englishScore );
+        Assertions.assertEquals ( expectedScore.mathScore, captorValue.mathScore );
+
+        Mockito.verify ( studentPassRepository, Mockito.times ( 1 ) ).save ( studentPassArgumentCaptor.capture () );
+        StudentPass captorPassValue = studentPassArgumentCaptor.getValue ( );
+        Assertions.assertEquals ( expectedPass.studentName, captorPassValue.studentName );
+        Assertions.assertEquals ( expectedPass.exam, captorPassValue.exam );
+        Assertions.assertEquals ( expectedPass.avgScore, captorPassValue.avgScore );
+
+        Mockito.verify ( studentFailRepository, Mockito.times ( 0 ) ).save ( studentFailArgumentCaptor.capture () );
     }
 
     @Test
