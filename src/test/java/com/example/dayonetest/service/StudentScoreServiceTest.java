@@ -6,10 +6,12 @@ import com.example.dayonetest.controller.response.ExamPassStudentResponse;
 import com.example.dayonetest.model.StudentFail;
 import com.example.dayonetest.model.StudentPass;
 import com.example.dayonetest.model.StudentScore;
+import com.example.dayonetest.model.StudentScoreTestDataBuilder;
 import com.example.dayonetest.repository.StudentFailRepository;
 import com.example.dayonetest.repository.StudentPassRepository;
 import com.example.dayonetest.repository.StudentScoreRepository;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,6 +23,19 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 class StudentScoreServiceTest {
+    private StudentScoreRepository studentScoreRepository;
+    private StudentPassRepository studentPassRepository;
+    private StudentFailRepository studentFailRepository;
+    private StudentScoreService studentScoreService;
+
+    @BeforeEach
+    public void beforeEach(){
+        studentScoreRepository = Mockito.mock ( StudentScoreRepository.class );
+        studentPassRepository = Mockito.mock ( StudentPassRepository.class );
+        studentFailRepository = Mockito.mock ( StudentFailRepository.class );
+        studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
+    }
+
     @Test
     @DisplayName ( "Mock 생성 테스트" )
     public void saveScoreMockTest() throws Exception{
@@ -42,20 +57,10 @@ class StudentScoreServiceTest {
     @DisplayName ( "통과 성적 저장 로직 검증" )
     public void savePassScore() throws Exception{
         //given
-        StudentScoreRepository studentScoreRepository = Mockito.mock ( StudentScoreRepository.class );
-        StudentPassRepository studentPassRepository = Mockito.mock ( StudentPassRepository.class );
-        StudentFailRepository studentFailRepository = Mockito.mock ( StudentFailRepository.class );
-        StudentScoreService studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
         String exam = "testExam";
         SaveExamScoreRequest testPassStudent = new SaveExamScoreRequest ( "pass", 60, 60, 60 );
 
-        StudentScore expectedScore = StudentScore.builder ( )
-                                            .studentName ( "pass" )
-                                            .exam ( exam )
-                                            .korScore ( 60 )
-                                            .englishScore ( 60 )
-                                            .mathScore ( 60 )
-                                            .build ( );
+        StudentScore expectedScore = StudentScoreTestDataBuilder.passed ().build ();
 
         StudentPass expectedPass = StudentPass.builder ( )
                                                 .studentName ( "pass" )
@@ -91,10 +96,6 @@ class StudentScoreServiceTest {
     @DisplayName ( "불합격 성적 저장 로직 검증" )
     public void saveFailScore() throws Exception{
         //given
-        StudentScoreRepository studentScoreRepository = Mockito.mock ( StudentScoreRepository.class );
-        StudentPassRepository studentPassRepository = Mockito.mock ( StudentPassRepository.class );
-        StudentFailRepository studentFailRepository = Mockito.mock ( StudentFailRepository.class );
-        StudentScoreService studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
         String exam = "testExam";
         SaveExamScoreRequest testFailStudent = new SaveExamScoreRequest ( "pass", 60, 59, 60 );
         //when
@@ -109,10 +110,6 @@ class StudentScoreServiceTest {
     @DisplayName ( "합격자 명단 가져오기" )
     public void getPassList() throws Exception{
         //given
-        StudentScoreRepository studentScoreRepository = Mockito.mock ( StudentScoreRepository.class );
-        StudentPassRepository studentPassRepository = Mockito.mock ( StudentPassRepository.class );
-        StudentFailRepository studentFailRepository = Mockito.mock ( StudentFailRepository.class );
-        StudentScoreService studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
         String exam = "testExam";
 
         StudentPass student1 = StudentPass.builder ( ).id ( 1L ).exam ( "testExam" ).studentName ( "yunseok" )
@@ -138,10 +135,6 @@ class StudentScoreServiceTest {
     @DisplayName ( "불합격자 명단 가져오기" )
     public void getFailList() throws Exception{
         //given
-        StudentScoreRepository studentScoreRepository = Mockito.mock ( StudentScoreRepository.class );
-        StudentPassRepository studentPassRepository = Mockito.mock ( StudentPassRepository.class );
-        StudentFailRepository studentFailRepository = Mockito.mock ( StudentFailRepository.class );
-        StudentScoreService studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
         String exam = "testExam";
 
         StudentFail student1 = StudentFail.builder ( ).id ( 1L ).exam ( "testExam" ).studentName ( "yunseok" )
