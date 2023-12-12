@@ -29,6 +29,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
 	annotationProcessor("org.projectlombok:lombok")
+	testImplementation ("org.mockito:mockito-core:3.+")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
