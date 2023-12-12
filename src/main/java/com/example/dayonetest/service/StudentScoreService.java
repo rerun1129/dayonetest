@@ -1,6 +1,7 @@
 package com.example.dayonetest.service;
 
 import com.example.dayonetest.MyCalculator;
+import com.example.dayonetest.controller.request.SaveExamScoreRequest;
 import com.example.dayonetest.controller.response.ExamFailStudentResponse;
 import com.example.dayonetest.controller.response.ExamPassStudentResponse;
 import com.example.dayonetest.model.StudentFail;
@@ -22,14 +23,17 @@ public class StudentScoreService {
     private final StudentPassRepository studentPassRepository;
     private final StudentFailRepository studentFailRepository;
 
-    public void saveScore (String studentName, String exam, Integer korScore, Integer englishScore, Integer mathScore) {
-        StudentScore saveEntity = StudentScore.builder ()
-                                            .studentName ( studentName )
-                                            .exam ( exam )
-                                            .korScore ( korScore )
-                                            .englishScore ( englishScore )
-                                            .mathScore ( mathScore )
-                                            .build ();
+    public void saveScore (SaveExamScoreRequest request, String exam ) {
+        Integer korScore = request.korScore ( );
+        Integer englishScore = request.englishScore ( );
+        Integer mathScore = request.mathScore ( );
+        StudentScore saveEntity = StudentScore.builder ( )
+                                                .studentName ( request.studentName () )
+                                                .exam ( exam )
+                                                .korScore ( korScore )
+                                                .englishScore ( englishScore )
+                                                .mathScore ( mathScore )
+                                                .build ();
         studentScoreRepository.save ( saveEntity );
 
         MyCalculator myCalculator = new MyCalculator ( );

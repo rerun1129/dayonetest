@@ -1,11 +1,20 @@
 package com.example.dayonetest.service;
 
+import com.example.dayonetest.controller.request.SaveExamScoreRequest;
+import com.example.dayonetest.controller.response.ExamFailStudentResponse;
+import com.example.dayonetest.controller.response.ExamPassStudentResponse;
+import com.example.dayonetest.model.StudentFail;
+import com.example.dayonetest.model.StudentPass;
 import com.example.dayonetest.repository.StudentFailRepository;
 import com.example.dayonetest.repository.StudentPassRepository;
 import com.example.dayonetest.repository.StudentScoreRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,14 +28,103 @@ class StudentScoreServiceTest {
                                         Mockito.mock ( StudentPassRepository.class ),
                                         Mockito.mock ( StudentFailRepository.class )
                                                     );
-        String studentName = "yunseok";
         String exam = "testExam";
-        Integer kor = 80;
-        Integer english = 100;
-        Integer math = 60;
         //when
-        studentScoreService.saveScore ( studentName, exam, kor, english, math );
+        studentScoreService.saveScore (  new SaveExamScoreRequest ( "yunseok", 80, 100, 60 ), exam );
         //then
         studentScoreService.getPassStudentsList ( exam );
+    }
+    @Test
+    @DisplayName ( "통과 성적 저장 로직 검증" )
+    public void savePassScore() throws Exception{
+        //given
+        StudentScoreRepository studentScoreRepository = Mockito.mock ( StudentScoreRepository.class );
+        StudentPassRepository studentPassRepository = Mockito.mock ( StudentPassRepository.class );
+        StudentFailRepository studentFailRepository = Mockito.mock ( StudentFailRepository.class );
+        StudentScoreService studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
+        String exam = "testExam";
+        SaveExamScoreRequest testPassStudent = new SaveExamScoreRequest ( "pass", 60, 60, 60 );
+        //when
+        studentScoreService.saveScore ( testPassStudent, exam );
+        //then
+        Mockito.verify ( studentScoreRepository, Mockito.times ( 1 ) ).save ( Mockito.any () );
+        Mockito.verify ( studentPassRepository, Mockito.times ( 1 ) ).save ( Mockito.any () );
+        Mockito.verify ( studentFailRepository, Mockito.times ( 0 ) ).save ( Mockito.any () );
+    }
+
+    @Test
+    @DisplayName ( "불합격 성적 저장 로직 검증" )
+    public void saveFailScore() throws Exception{
+        //given
+        StudentScoreRepository studentScoreRepository = Mockito.mock ( StudentScoreRepository.class );
+        StudentPassRepository studentPassRepository = Mockito.mock ( StudentPassRepository.class );
+        StudentFailRepository studentFailRepository = Mockito.mock ( StudentFailRepository.class );
+        StudentScoreService studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
+        String exam = "testExam";
+        SaveExamScoreRequest testFailStudent = new SaveExamScoreRequest ( "pass", 60, 59, 60 );
+        //when
+        studentScoreService.saveScore ( testFailStudent, exam );
+        //then
+        Mockito.verify ( studentScoreRepository, Mockito.times ( 1 ) ).save ( Mockito.any () );
+        Mockito.verify ( studentPassRepository, Mockito.times ( 0 ) ).save ( Mockito.any () );
+        Mockito.verify ( studentFailRepository, Mockito.times ( 1 ) ).save ( Mockito.any () );
+    }
+
+    @Test
+    @DisplayName ( "합격자 명단 가져오기" )
+    public void getPassList() throws Exception{
+        //given
+        StudentScoreRepository studentScoreRepository = Mockito.mock ( StudentScoreRepository.class );
+        StudentPassRepository studentPassRepository = Mockito.mock ( StudentPassRepository.class );
+        StudentFailRepository studentFailRepository = Mockito.mock ( StudentFailRepository.class );
+        StudentScoreService studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
+        String exam = "testExam";
+
+        StudentPass student1 = StudentPass.builder ( ).id ( 1L ).exam ( "testExam" ).studentName ( "yunseok" )
+                                        .avgScore ( 70.0 ).build ( );
+        StudentPass student2 = StudentPass.builder ( ).id ( 2L ).exam ( "testExam" ).studentName ( "yunseok2" )
+                                        .avgScore ( 80.0 ).build ( );
+        StudentPass student3 = StudentPass.builder ( ).id ( 3L ).exam ( "secondExam" ).studentName ( "yunseok3" )
+                                        .avgScore ( 90.0 ).build ( );
+        Mockito.when ( studentPassRepository.findAll ( ) ).thenReturn (
+                List.of (
+                        student1,
+                        student2,
+                        student3
+                    ) );
+        //when
+        List <ExamPassStudentResponse> expectList = Stream.of ( student1, student2 ).map ( StudentPass::toResponse ).toList ( );
+        List <ExamPassStudentResponse> passStudentsList = studentScoreService.getPassStudentsList ( exam );
+        //then
+        Assertions.assertIterableEquals ( expectList, passStudentsList );
+    }
+
+    @Test
+    @DisplayName ( "불합격자 명단 가져오기" )
+    public void getFailList() throws Exception{
+        //given
+        StudentScoreRepository studentScoreRepository = Mockito.mock ( StudentScoreRepository.class );
+        StudentPassRepository studentPassRepository = Mockito.mock ( StudentPassRepository.class );
+        StudentFailRepository studentFailRepository = Mockito.mock ( StudentFailRepository.class );
+        StudentScoreService studentScoreService = new StudentScoreService ( studentScoreRepository,studentPassRepository, studentFailRepository);
+        String exam = "testExam";
+
+        StudentFail student1 = StudentFail.builder ( ).id ( 1L ).exam ( "testExam" ).studentName ( "yunseok" )
+                                    .avgScore ( 30.0 ).build ( );
+        StudentFail student2 = StudentFail.builder ( ).id ( 2L ).exam ( "testExam" ).studentName ( "yunseok2" )
+                                    .avgScore ( 40.0 ).build ( );
+        StudentFail student3 = StudentFail.builder ( ).id ( 3L ).exam ( "secondExam" ).studentName ( "yunseok3" )
+                                    .avgScore ( 80.0 ).build ( );
+        Mockito.when ( studentFailRepository.findAll ( ) ).thenReturn (
+                List.of (
+                        student1,
+                        student2,
+                        student3
+                        ) );
+        //when
+        List <ExamFailStudentResponse> expectList = Stream.of ( student1, student2 ).map ( StudentFail::toResponse ).toList ( );
+        List <ExamFailStudentResponse> failStudentsList = studentScoreService.getFailStudentsList ( exam );
+        //then
+        Assertions.assertIterableEquals ( expectList, failStudentsList );
     }
 }

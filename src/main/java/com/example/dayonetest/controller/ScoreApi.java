@@ -17,7 +17,7 @@ public class ScoreApi {
 
     @PutMapping("/score")
     public void save (@PathVariable("exam") String exam, @RequestBody SaveExamScoreRequest request ){
-        studentScoreService.saveScore ( request.studentName (), exam, request.korScore ( ), request.englishScore ( ), request.mathScore ( ) );
+        studentScoreService.saveScore ( request, exam );
     }
 
     @GetMapping("/pass")
