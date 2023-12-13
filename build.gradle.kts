@@ -28,11 +28,13 @@ dependencies {
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation ("org.springframework.boot:spring-boot-starter-data-redis")
 
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation ("org.mockito:mockito-core:3.+")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation ("org.testcontainers:testcontainers:1.19.0")
+	testImplementation ("com.redis.testcontainers:testcontainers-redis-junit:1.6.4")
 }
 
 tasks.withType<Test> {

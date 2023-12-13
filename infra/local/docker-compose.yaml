@@ -1,6 +1,10 @@
 version: "3.8"
 
 services:
+  local-redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
   local-db:
     image: mysql:8.0 # mysql:8 대신, mysql:8.0을 사용해주세요!
     environment:
