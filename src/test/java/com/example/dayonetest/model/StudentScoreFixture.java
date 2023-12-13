@@ -1,5 +1,7 @@
 package com.example.dayonetest.model;
 
+import com.example.dayonetest.controller.request.SaveExamScoreRequest;
+
 public class StudentScoreFixture {
 
     public static StudentScore passed() {
@@ -18,5 +20,9 @@ public class StudentScoreFixture {
                             .mathScore ( 20 )
                             .studentName ( "defaultName" )
                             .exam ( "defaultExam" ).build ();
+    }
+
+    public static SaveExamScoreRequest makeRequestScore(StudentScore score) {
+        return new SaveExamScoreRequest ( score.studentName, score.korScore, score.englishScore, score.mathScore );
     }
 }
